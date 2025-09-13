@@ -1,0 +1,54 @@
+import pool from '@/config/db.config';
+import bcryptjs from 'bcryptjs';
+import { LoginInput } from './auth.schema';
+import { ApiError } from '@/utils/ApiError';
+import { RowDataPacket } from 'mysql2';
+import envConfig from '@/config/env.config';
+import jwt from 'jsonwebtoken';
+import { IAdmin } from './auth.types';
+
+type IAdminQuery = IAdmin & RowDataPacket;
+
+const login = async (
+  input: LoginInput,
+): Promise<{
+  token: string;
+  user: Partial<IAdmin>;
+}> => {
+  const errorMessage = "Email or password doesn't match";
+
+  const [rows] = await pool.query<IAdminQuery[]>(
+    'SELECT * FROM admins WHERE email = ?',
+    [input.email],
+  );
+
+  if (rows.length === 0) {
+    throw new ApiError(404, errorMessage);
+  }
+
+  const user = rows[0];
+
+  const isPasswordValid = await bcryptjs.compare(input.password, user.password);
+  if (!isPasswordValid) {
+    throw new ApiError(401, errorMessage);
+  }
+
+  const jwtPayload = { userId: user.id };
+
+  const token = jwt.sign(jwtPayload, envConfig.jwtSecret, {
+    expiresIn: '1h',
+  });
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  };
+};
+
+export const authService = {
+  login,
+};
