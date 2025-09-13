@@ -33,7 +33,7 @@ const login = async (
     throw new ApiError(401, errorMessage);
   }
 
-  const jwtPayload = { userId: user.id };
+  const jwtPayload = { userId: user.id, role: 'admin' };
 
   const token = jwt.sign(jwtPayload, envConfig.jwtSecret, {
     expiresIn: '1h',

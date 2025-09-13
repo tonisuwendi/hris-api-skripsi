@@ -1,0 +1,53 @@
+import { NextFunction, Request, Response } from 'express';
+import { employeeService } from './employee.service';
+import { ApiError } from '@/utils/ApiError';
+
+const getEmployees = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const employees = await employeeService.getEmployees(req.query);
+    res.status(200).json({
+      success: true,
+      message: 'Employees retrieved successfully',
+      data: employees,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const insertEmployee = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (req.file) {
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        throw new ApiError(400, 'Photo must be JPEG or PNG format');
+      }
+      if (req.file.size > 2 * 1024 * 1024) {
+        throw new ApiError(400, 'Photo size must not exceed 2MB');
+      }
+    }
+
+    const employee = await employeeService.insertEmployee(req.body, req.file);
+
+    return res.json({
+      success: true,
+      message: 'Employee created successfully',
+      data: employee,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const employeeController = {
+  getEmployees,
+  insertEmployee,
+};
