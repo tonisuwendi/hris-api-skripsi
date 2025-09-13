@@ -63,10 +63,22 @@ const insertEmployee = z.object({
     .nullable(),
 });
 
+const updateEmployee = insertEmployee.extend({
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(100, 'Password must be at most 100 characters')
+    .optional()
+    .nullable()
+    .or(z.literal('')),
+});
+
 export const employeeSchema = {
   getEmployees,
   insertEmployee,
+  updateEmployee,
 };
 
 export type GetEmployeesParams = z.infer<typeof employeeSchema.getEmployees>;
 export type InsertEmployeeBody = z.infer<typeof employeeSchema.insertEmployee>;
+export type UpdateEmployeeBody = z.infer<typeof employeeSchema.updateEmployee>;

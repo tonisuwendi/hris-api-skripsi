@@ -23,4 +23,15 @@ router.post(
   employeeController.insertEmployee,
 );
 
+// @ PUT /admin/employees/:id
+router.put(
+  '/:id',
+  upload.single('photo'),
+  validateRequest(employeeSchema.updateEmployee),
+  employeeController.updateEmployee,
+);
+
+// @ DELETE /admin/employees/:id
+router.delete('/:id', employeeController.deleteEmployee);
+
 export default router;
