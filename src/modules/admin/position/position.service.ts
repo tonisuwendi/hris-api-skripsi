@@ -108,6 +108,18 @@ const deletePosition = async (id: number): Promise<Partial<IPosition>> => {
     throw new ApiError(404, 'Position not found');
   }
 
+  const [employeeCheck] = await pool.query<IPositionQuery[]>(
+    'SELECT id FROM employees WHERE position_id = ?',
+    [id],
+  );
+
+  if (employeeCheck.length > 0) {
+    throw new ApiError(
+      400,
+      'Cannot delete position with assigned employees. Reassign or remove employees first.',
+    );
+  }
+
   await pool.query('DELETE FROM positions WHERE id = ?', [id]);
 
   return existing[0];
