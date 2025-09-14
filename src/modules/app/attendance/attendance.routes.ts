@@ -5,6 +5,13 @@ import { attendanceController } from './attendance.controller';
 
 const router = express.Router();
 
+// @ GET /app/attendance/history
+router.get(
+  '/history',
+  validateRequest(attendanceSchema.getAttendanceHistory),
+  attendanceController.getAttendanceHistory,
+);
+
 // @ POST /app/attendance/start
 router.post(
   '/start',

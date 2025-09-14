@@ -1,6 +1,35 @@
 import { NextFunction, Request, Response } from 'express';
 import { attendanceService } from './attendance.service';
 
+const getAttendanceHistory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = (req as any).user?.id;
+    const params = {
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 10,
+      start_date: String(req.query.start_date || ''),
+      end_date: String(req.query.end_date || ''),
+    };
+
+    const historyData = await attendanceService.getAttendanceHistory(
+      Number(userId),
+      params,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Attendance history retrieved successfully',
+      data: historyData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const clockIn = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = (req as any).user?.id;
@@ -38,6 +67,7 @@ const clockOut = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const attendanceController = {
+  getAttendanceHistory,
   clockIn,
   clockOut,
 };
