@@ -1,15 +1,9 @@
 import pool from '@/config/db.config';
 import envConfig from '@/config/env.config';
+import { EmployeeQuery } from '@/types/modules';
 import { ApiError } from '@/utils/ApiError';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { RowDataPacket } from 'mysql2';
-
-type IEmployeeQuery = {
-  id: number;
-  email: string;
-  status: 'active' | 'inactive';
-} & RowDataPacket;
 
 export const isEmployee = async (
   req: Request,
@@ -36,7 +30,7 @@ export const isEmployee = async (
       throw new ApiError(403, 'Forbidden: Employee access only');
     }
 
-    const [rows] = await pool.query<IEmployeeQuery[]>(
+    const [rows] = await pool.query<EmployeeQuery[]>(
       'SELECT id, email, status FROM employees WHERE id = ? LIMIT 1',
       [decoded.userId],
     );

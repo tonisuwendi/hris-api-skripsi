@@ -1,14 +1,12 @@
 import pool from '@/config/db.config';
-import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { ResultSetHeader } from 'mysql2';
 import { sanitizePagination } from '@/utils/helpers';
 import { ApiError } from '@/utils/ApiError';
-import { IPosition } from './position.types';
+import { IPosition, PositionQuery } from '@/types/modules';
 import {
   GetPositionsParams,
   InsertUpdatePositionBody,
 } from './position.schema';
-
-type IPositionQuery = IPosition & RowDataPacket;
 
 const getPositions = async (
   params: GetPositionsParams,
@@ -29,14 +27,14 @@ const getPositions = async (
     LIMIT ${offset}, ${limit}
   `;
 
-  const [rows] = await pool.query<IPositionQuery[]>(sql);
+  const [rows] = await pool.query<PositionQuery[]>(sql);
   return rows;
 };
 
 const insertPosition = async (
   input: InsertUpdatePositionBody,
 ): Promise<Partial<IPosition>> => {
-  const [existing] = await pool.query<IPositionQuery[]>(
+  const [existing] = await pool.query<PositionQuery[]>(
     'SELECT id FROM positions WHERE name = ?',
     [input.name],
   );
@@ -51,7 +49,7 @@ const insertPosition = async (
     [input.name, input.description],
   );
 
-  const [rows] = await pool.query<IPositionQuery[]>(
+  const [rows] = await pool.query<PositionQuery[]>(
     'SELECT id, name, description, created_at FROM positions WHERE id = ?',
     [result.insertId],
   );
@@ -63,7 +61,7 @@ const updatePosition = async (
   id: number,
   input: InsertUpdatePositionBody,
 ): Promise<Partial<IPosition>> => {
-  const [existing] = await pool.query<IPositionQuery[]>(
+  const [existing] = await pool.query<PositionQuery[]>(
     'SELECT id, name, description FROM positions WHERE id = ?',
     [id],
   );
@@ -73,7 +71,7 @@ const updatePosition = async (
   }
 
   if (input.name !== existing[0].name) {
-    const [nameCheck] = await pool.query<IPositionQuery[]>(
+    const [nameCheck] = await pool.query<PositionQuery[]>(
       'SELECT id FROM positions WHERE name = ? AND id != ?',
       [input.name, id],
     );
@@ -90,7 +88,7 @@ const updatePosition = async (
     [input.name, input.description, id],
   );
 
-  const [rows] = await pool.query<IPositionQuery[]>(
+  const [rows] = await pool.query<PositionQuery[]>(
     'SELECT id, name, description, created_at FROM positions WHERE id = ?',
     [id],
   );
@@ -99,7 +97,7 @@ const updatePosition = async (
 };
 
 const deletePosition = async (id: number): Promise<Partial<IPosition>> => {
-  const [existing] = await pool.query<IPositionQuery[]>(
+  const [existing] = await pool.query<PositionQuery[]>(
     'SELECT id, name, description FROM positions WHERE id = ?',
     [id],
   );
@@ -108,7 +106,7 @@ const deletePosition = async (id: number): Promise<Partial<IPosition>> => {
     throw new ApiError(404, 'Position not found');
   }
 
-  const [employeeCheck] = await pool.query<IPositionQuery[]>(
+  const [employeeCheck] = await pool.query<PositionQuery[]>(
     'SELECT id FROM employees WHERE position_id = ?',
     [id],
   );

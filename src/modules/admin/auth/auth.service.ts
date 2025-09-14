@@ -2,12 +2,9 @@ import pool from '@/config/db.config';
 import bcryptjs from 'bcryptjs';
 import { LoginInput } from './auth.schema';
 import { ApiError } from '@/utils/ApiError';
-import { RowDataPacket } from 'mysql2';
 import envConfig from '@/config/env.config';
 import jwt from 'jsonwebtoken';
-import { IAdmin } from './auth.types';
-
-type IAdminQuery = IAdmin & RowDataPacket;
+import { AdminQuery, IAdmin } from '@/types/modules';
 
 const login = async (
   input: LoginInput,
@@ -17,7 +14,7 @@ const login = async (
 }> => {
   const errorMessage = "Email or password doesn't match";
 
-  const [rows] = await pool.query<IAdminQuery[]>(
+  const [rows] = await pool.query<AdminQuery[]>(
     'SELECT * FROM admins WHERE email = ?',
     [input.email],
   );

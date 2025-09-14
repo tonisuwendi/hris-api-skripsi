@@ -36,7 +36,7 @@ const insertEmployee = z.object({
     .optional()
     .nullable(),
   religion: z
-    .enum(['islam', 'kristen', 'katolik', 'hindu', 'budha', 'konghucu'])
+    .enum(['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'konghucu'])
     .optional()
     .nullable(),
   address: z.string().optional().nullable(),

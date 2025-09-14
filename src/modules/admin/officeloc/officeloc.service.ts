@@ -1,14 +1,12 @@
 import pool from '@/config/db.config';
-import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { ResultSetHeader } from 'mysql2';
 import { sanitizePagination } from '@/utils/helpers';
 import { ApiError } from '@/utils/ApiError';
-import { IOfficeLocation } from './officeloc.types';
+import { IOfficeLocation, OfficeLocationQuery } from '@/types/modules';
 import {
   GetOfficeLocationParams,
   InsertUpdateOfficeLocationBody,
 } from './officeloc.schema';
-
-type IOfficeLocationQuery = IOfficeLocation & RowDataPacket;
 
 const getOfficeLocation = async (
   params: GetOfficeLocationParams,
@@ -23,7 +21,7 @@ const getOfficeLocation = async (
     LIMIT ${offset}, ${limit}
   `;
 
-  const [rows] = await pool.query<IOfficeLocationQuery[]>(sql);
+  const [rows] = await pool.query<OfficeLocationQuery[]>(sql);
   return rows;
 };
 
@@ -36,7 +34,7 @@ const insertOfficeLocation = async (
     [input.name, input.latitude, input.longitude, input.radius_meters],
   );
 
-  const [rows] = await pool.query<IOfficeLocationQuery[]>(
+  const [rows] = await pool.query<OfficeLocationQuery[]>(
     'SELECT id, name, latitude, longitude, radius_meters, created_at FROM office_locations WHERE id = ?',
     [result.insertId],
   );
@@ -48,7 +46,7 @@ const updateOfficeLocation = async (
   id: number,
   input: InsertUpdateOfficeLocationBody,
 ): Promise<Partial<IOfficeLocation>> => {
-  const [existing] = await pool.query<IOfficeLocationQuery[]>(
+  const [existing] = await pool.query<OfficeLocationQuery[]>(
     'SELECT id FROM office_locations WHERE id = ?',
     [id],
   );
@@ -64,7 +62,7 @@ const updateOfficeLocation = async (
     [input.name, input.latitude, input.longitude, input.radius_meters, id],
   );
 
-  const [rows] = await pool.query<IOfficeLocationQuery[]>(
+  const [rows] = await pool.query<OfficeLocationQuery[]>(
     'SELECT id, name, latitude, longitude, radius_meters, created_at FROM office_locations WHERE id = ?',
     [id],
   );
@@ -75,7 +73,7 @@ const updateOfficeLocation = async (
 const deleteOfficeLocation = async (
   id: number,
 ): Promise<Partial<IOfficeLocation>> => {
-  const [existing] = await pool.query<IOfficeLocationQuery[]>(
+  const [existing] = await pool.query<OfficeLocationQuery[]>(
     'SELECT id, name, latitude, longitude, radius_meters FROM office_locations WHERE id = ?',
     [id],
   );

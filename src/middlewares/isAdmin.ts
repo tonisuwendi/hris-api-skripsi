@@ -1,5 +1,6 @@
 import pool from '@/config/db.config';
 import envConfig from '@/config/env.config';
+import { AdminQuery } from '@/types/modules';
 import { ApiError } from '@/utils/ApiError';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
@@ -29,7 +30,7 @@ export const isAdmin = async (
       throw new ApiError(403, 'Forbidden: Admin access only');
     }
 
-    const [rows] = await pool.query(
+    const [rows] = await pool.query<AdminQuery[]>(
       'SELECT id, email FROM admins WHERE id = ? LIMIT 1',
       [decoded.userId],
     );

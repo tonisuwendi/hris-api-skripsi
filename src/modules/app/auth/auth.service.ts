@@ -2,12 +2,9 @@ import pool from '@/config/db.config';
 import bcryptjs from 'bcryptjs';
 import { LoginInput } from './auth.schema';
 import { ApiError } from '@/utils/ApiError';
-import { RowDataPacket } from 'mysql2';
 import envConfig from '@/config/env.config';
 import jwt from 'jsonwebtoken';
-import { IEmployee } from './auth.types';
-
-type IEmployeeQuery = IEmployee & RowDataPacket;
+import { EmployeeQuery, IEmployee } from '@/types/modules';
 
 const login = async (
   input: LoginInput,
@@ -17,7 +14,7 @@ const login = async (
 }> => {
   const errorMessage = "Email or password doesn't match";
 
-  const [rows] = await pool.query<IEmployeeQuery[]>(
+  const [rows] = await pool.query<EmployeeQuery[]>(
     'SELECT * FROM employees WHERE email = ?',
     [input.email],
   );

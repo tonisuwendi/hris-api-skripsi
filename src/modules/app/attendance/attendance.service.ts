@@ -1,29 +1,23 @@
 import pool from '@/config/db.config';
 import { ApiError } from '@/utils/ApiError';
-import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { IAttendanceSession } from './attendance.types';
+import { ResultSetHeader } from 'mysql2';
 import { ClockInOutInput } from './attendance.schema';
 import { haversineDistance } from '@/utils/haversine';
-
-type IAttendanceSessionQuery = IAttendanceSession & RowDataPacket;
-
-type ILocationQuery = {
-  id: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  radius_meters: number;
-} & RowDataPacket;
+import {
+  AttendanceSessionQuery,
+  IAttendanceSession,
+  OfficeLocationQuery,
+} from '@/types/modules';
 
 const clockIn = async (
   input: ClockInOutInput,
   employeeId: number,
 ): Promise<IAttendanceSession> => {
-  const [offices] = await pool.query<ILocationQuery[]>(
+  const [offices] = await pool.query<OfficeLocationQuery[]>(
     'SELECT id, name, latitude, longitude, radius_meters FROM office_locations',
   );
 
-  const [activeSessions] = await pool.query<IAttendanceSessionQuery[]>(
+  const [activeSessions] = await pool.query<AttendanceSessionQuery[]>(
     'SELECT id FROM attendance_sessions WHERE employee_id = ? AND end_time IS NULL',
     [employeeId],
   );
@@ -67,7 +61,7 @@ const clockIn = async (
     ],
   );
 
-  const [rows] = await pool.query<IAttendanceSessionQuery[]>(
+  const [rows] = await pool.query<AttendanceSessionQuery[]>(
     'SELECT * FROM attendance_sessions WHERE id = ?',
     [result.insertId],
   );
@@ -79,7 +73,7 @@ const clockOut = async (
   input: ClockInOutInput,
   employeeId: number,
 ): Promise<IAttendanceSession> => {
-  const [activeSessions] = await pool.query<IAttendanceSessionQuery[]>(
+  const [activeSessions] = await pool.query<AttendanceSessionQuery[]>(
     `SELECT * FROM attendance_sessions 
      WHERE employee_id = ? AND end_time IS NULL 
      ORDER BY start_time DESC LIMIT 1`,
@@ -97,7 +91,7 @@ const clockOut = async (
     [input.latitude, input.longitude, activeSession.id],
   );
 
-  const [updatedRows] = await pool.query<IAttendanceSessionQuery[]>(
+  const [updatedRows] = await pool.query<AttendanceSessionQuery[]>(
     'SELECT * FROM attendance_sessions WHERE id = ?',
     [activeSession.id],
   );

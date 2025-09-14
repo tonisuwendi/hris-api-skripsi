@@ -1,18 +1,16 @@
 import pool from '@/config/db.config';
 import bcryptjs from 'bcryptjs';
-import { IEmployee } from './employee.types';
-import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { ResultSetHeader } from 'mysql2';
 import { sanitizePagination } from '@/utils/helpers';
 import { ApiError } from '@/utils/ApiError';
 import { randomUUID } from 'crypto';
 import { uploadFile } from '@/utils/s3';
+import { EmployeeQuery, IEmployee } from '@/types/modules';
 import {
   GetEmployeesParams,
   InsertEmployeeBody,
   UpdateEmployeeBody,
 } from './employee.schema';
-
-type IEmployeeQuery = IEmployee & RowDataPacket;
 
 const getEmployees = async (
   params: GetEmployeesParams,
@@ -36,7 +34,7 @@ const getEmployees = async (
     LIMIT ${offset}, ${limit}
   `;
 
-  const [rows] = await pool.query<IEmployeeQuery[]>(sql);
+  const [rows] = await pool.query<EmployeeQuery[]>(sql);
   return rows;
 };
 
@@ -44,7 +42,7 @@ const insertEmployee = async (
   input: InsertEmployeeBody,
   file: Express.Multer.File | undefined,
 ): Promise<Partial<IEmployee>> => {
-  const [existingCode] = await pool.query<IEmployeeQuery[]>(
+  const [existingCode] = await pool.query<EmployeeQuery[]>(
     'SELECT id FROM employees WHERE employee_code = ?',
     [input.employee_code],
   );
@@ -53,7 +51,7 @@ const insertEmployee = async (
     throw new ApiError(400, 'Employee code already exists');
   }
 
-  const [existingEmail] = await pool.query<IEmployeeQuery[]>(
+  const [existingEmail] = await pool.query<EmployeeQuery[]>(
     'SELECT id FROM employees WHERE email = ?',
     [input.email],
   );
@@ -62,7 +60,7 @@ const insertEmployee = async (
     throw new ApiError(400, 'Email already exists');
   }
 
-  const [checkPosition] = await pool.query<IEmployeeQuery[]>(
+  const [checkPosition] = await pool.query<EmployeeQuery[]>(
     'SELECT id FROM positions WHERE id = ?',
     [input.position_id],
   );
@@ -109,16 +107,12 @@ const insertEmployee = async (
     ],
   );
 
-  const [rows] = await pool.query<IEmployeeQuery[]>(
-    'SELECT id FROM employees WHERE employee_code = ?',
+  const [rows] = await pool.query<EmployeeQuery[]>(
+    'SELECT id, employee_code, name, email, photo_url FROM employees WHERE employee_code = ?',
     [input.employee_code],
   );
 
-  return {
-    id: rows[0].id,
-    ...input,
-    photo_url: photoUrl,
-  };
+  return rows[0];
 };
 
 const updateEmployee = async (
@@ -126,7 +120,7 @@ const updateEmployee = async (
   input: UpdateEmployeeBody,
   file: Express.Multer.File | undefined,
 ): Promise<Partial<IEmployee>> => {
-  const [existing] = await pool.query<IEmployeeQuery[]>(
+  const [existing] = await pool.query<EmployeeQuery[]>(
     'SELECT id, employee_code, email FROM employees WHERE id = ?',
     [id],
   );
@@ -136,7 +130,7 @@ const updateEmployee = async (
   }
 
   if (input.employee_code !== existing[0].employee_code) {
-    const [existingCode] = await pool.query<IEmployeeQuery[]>(
+    const [existingCode] = await pool.query<EmployeeQuery[]>(
       'SELECT id FROM employees WHERE employee_code = ?',
       [input.employee_code],
     );
@@ -147,7 +141,7 @@ const updateEmployee = async (
   }
 
   if (input.email !== existing[0].email) {
-    const [existingEmail] = await pool.query<IEmployeeQuery[]>(
+    const [existingEmail] = await pool.query<EmployeeQuery[]>(
       'SELECT id FROM employees WHERE email = ?',
       [input.email],
     );
@@ -157,7 +151,7 @@ const updateEmployee = async (
     }
   }
 
-  const [checkPosition] = await pool.query<IEmployeeQuery[]>(
+  const [checkPosition] = await pool.query<EmployeeQuery[]>(
     'SELECT id FROM positions WHERE id = ?',
     [input.position_id],
   );
@@ -228,20 +222,16 @@ const updateEmployee = async (
     ],
   );
 
-  const [rows] = await pool.query<IEmployeeQuery[]>(
-    'SELECT id FROM employees WHERE employee_code = ?',
+  const [rows] = await pool.query<EmployeeQuery[]>(
+    'SELECT id, employee_code, name, email, photo_url FROM employees WHERE employee_code = ?',
     [input.employee_code],
   );
 
-  return {
-    id: rows[0].id,
-    ...input,
-    photo_url: photoUrl,
-  };
+  return rows[0];
 };
 
 const deleteEmployee = async (id: number): Promise<Partial<IEmployee>> => {
-  const [existing] = await pool.query<IEmployeeQuery[]>(
+  const [existing] = await pool.query<EmployeeQuery[]>(
     'SELECT id, employee_code, name, email FROM employees WHERE id = ?',
     [id],
   );
