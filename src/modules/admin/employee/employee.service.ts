@@ -11,11 +11,18 @@ import {
   InsertEmployeeBody,
   UpdateEmployeeBody,
 } from './employee.schema';
+import { IGetAllResult } from '@/types/general';
 
 const getEmployees = async (
   params: GetEmployeesParams,
-): Promise<Partial<IEmployee>[]> => {
+): Promise<IGetAllResult<IEmployee>> => {
   const { limit, offset } = sanitizePagination(params.limit, params.page);
+
+  const [countRows] = await pool.query<EmployeeQuery[]>(
+    'SELECT COUNT(*) as total FROM employees',
+  );
+
+  const total = countRows[0].total as number;
 
   const sql = `
     SELECT 
@@ -35,7 +42,11 @@ const getEmployees = async (
   `;
 
   const [rows] = await pool.query<EmployeeQuery[]>(sql);
-  return rows;
+
+  return {
+    data: rows,
+    pagination: { total, limit, page: params.page ? Number(params.page) : 1 },
+  };
 };
 
 const insertEmployee = async (

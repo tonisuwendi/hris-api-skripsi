@@ -7,11 +7,18 @@ import {
   GetOfficeLocationParams,
   InsertUpdateOfficeLocationBody,
 } from './officeloc.schema';
+import { IGetAllResult } from '@/types/general';
 
 const getOfficeLocation = async (
   params: GetOfficeLocationParams,
-): Promise<Partial<IOfficeLocation>[]> => {
+): Promise<IGetAllResult<IOfficeLocation>> => {
   const { limit, offset } = sanitizePagination(params.limit, params.page);
+
+  const [countRows] = await pool.query<OfficeLocationQuery[]>(
+    'SELECT COUNT(*) as total FROM office_locations',
+  );
+
+  const total = countRows[0].total as number;
 
   const sql = `
     SELECT
@@ -22,7 +29,11 @@ const getOfficeLocation = async (
   `;
 
   const [rows] = await pool.query<OfficeLocationQuery[]>(sql);
-  return rows;
+
+  return {
+    data: rows,
+    pagination: { total, limit, page: params.page ? Number(params.page) : 1 },
+  };
 };
 
 const insertOfficeLocation = async (

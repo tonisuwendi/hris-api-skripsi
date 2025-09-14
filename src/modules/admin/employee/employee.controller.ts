@@ -8,11 +8,11 @@ const getEmployees = async (
   next: NextFunction,
 ) => {
   try {
-    const employees = await employeeService.getEmployees(req.query);
+    const result = await employeeService.getEmployees(req.query);
     res.status(200).json({
       success: true,
       message: 'Employees retrieved successfully',
-      data: employees,
+      ...result,
     });
   } catch (error) {
     next(error);

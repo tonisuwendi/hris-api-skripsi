@@ -63,11 +63,11 @@ const deletePosition = async (
 ) => {
   try {
     const { id } = req.params;
-    const position = await positionService.deletePosition(Number(id));
+    const result = await positionService.deletePosition(Number(id));
     return res.status(200).json({
       success: true,
       message: 'Position deleted successfully',
-      data: position,
+      ...result,
     });
   } catch (error) {
     next(error);

@@ -7,11 +7,18 @@ import {
   GetPositionsParams,
   InsertUpdatePositionBody,
 } from './position.schema';
+import { IGetAllResult } from '@/types/general';
 
 const getPositions = async (
   params: GetPositionsParams,
-): Promise<Partial<IPosition>[]> => {
+): Promise<IGetAllResult<IPosition>> => {
   const { limit, offset } = sanitizePagination(params.limit, params.page);
+
+  const [countRows] = await pool.query<PositionQuery[]>(
+    'SELECT COUNT(*) as total FROM positions',
+  );
+
+  const total = countRows[0].total as number;
 
   const sql = `
     SELECT
@@ -28,7 +35,11 @@ const getPositions = async (
   `;
 
   const [rows] = await pool.query<PositionQuery[]>(sql);
-  return rows;
+
+  return {
+    data: rows,
+    pagination: { total, limit, page: params.page ? Number(params.page) : 1 },
+  };
 };
 
 const insertPosition = async (

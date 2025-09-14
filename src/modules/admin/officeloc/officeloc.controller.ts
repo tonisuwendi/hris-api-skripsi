@@ -7,11 +7,11 @@ const getOfficeLocations = async (
   next: NextFunction,
 ) => {
   try {
-    const locations = await officeLocationService.getOfficeLocation(req.query);
+    const result = await officeLocationService.getOfficeLocation(req.query);
     res.status(200).json({
       success: true,
       message: 'Office locations retrieved successfully',
-      data: locations,
+      ...result,
     });
   } catch (error) {
     next(error);
