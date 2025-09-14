@@ -4,6 +4,7 @@ import cors from 'cors';
 import { errorHandler } from './middlewares/errorHandler';
 import compression from 'compression';
 import adminRoutes from './modules/admin/admin.routes';
+import appRoutes from './modules/app/app.routes';
 
 import 'module-alias/register';
 
@@ -22,6 +23,7 @@ const main = async (): Promise<void> => {
   app.use(express.urlencoded({ extended: true }));
 
   app.use('/admin', adminRoutes);
+  app.use('/app', appRoutes);
 
   app.use(errorHandler);
 
