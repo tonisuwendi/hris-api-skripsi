@@ -4,6 +4,7 @@ import employeeRoutes from './employee/employee.routes';
 import positionRoutes from './position/position.routes';
 import officeLocationRoutes from './officeloc/officeloc.routes';
 import attendanceRoutes from './attendance/attendance.routes';
+import taskSummaryRoutes from './taskSummary/taskSummary.routes';
 import { isAdmin } from '@/middlewares/isAdmin';
 
 const routes = express.Router();
@@ -13,5 +14,6 @@ routes.use('/positions', isAdmin, positionRoutes);
 routes.use('/employees', isAdmin, employeeRoutes);
 routes.use('/office-locations', isAdmin, officeLocationRoutes);
 routes.use('/attendance', isAdmin, attendanceRoutes);
+routes.use('/task-summary', isAdmin, taskSummaryRoutes);
 
 export default routes;

@@ -70,3 +70,13 @@ CREATE TABLE attendance_sessions (
   FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
   FOREIGN KEY (office_id) REFERENCES office_locations(id) ON DELETE SET NULL
 );
+
+CREATE TABLE task_summaries (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  employee_id INT NOT NULL,
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  completed_tasks INT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
