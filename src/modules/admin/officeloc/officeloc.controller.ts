@@ -18,6 +18,26 @@ const getOfficeLocations = async (
   }
 };
 
+const getOfficeLocationById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const location = await officeLocationService.getOfficeLocationById(
+      Number(id),
+    );
+    return res.status(200).json({
+      success: true,
+      message: 'Office location retrieved successfully',
+      data: location,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const insertOfficeLocation = async (
   req: Request,
   res: Response,
@@ -81,6 +101,7 @@ const deleteOfficeLocation = async (
 
 export const officeLocationController = {
   getOfficeLocations,
+  getOfficeLocationById,
   insertOfficeLocation,
   updateOfficeLocation,
   deleteOfficeLocation,

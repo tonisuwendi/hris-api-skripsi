@@ -19,6 +19,24 @@ const getTaskSummary = async (
   }
 };
 
+const getTaskSummaryById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id ? Number(req.params.id) : 0;
+    const result = await taskSummaryService.getTaskSummaryById(id);
+    res.status(200).json({
+      success: true,
+      message: 'Task summary retrieved successfully',
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const insertTaskSummary = async (
   req: Request,
   res: Response,
@@ -78,6 +96,7 @@ const deleteTaskSummary = async (
 
 export const taskSummaryController = {
   getTaskSummary,
+  getTaskSummaryById,
   insertTaskSummary,
   updateTaskSummary,
   deleteTaskSummary,

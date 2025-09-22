@@ -36,6 +36,21 @@ const getOfficeLocation = async (
   };
 };
 
+const getOfficeLocationById = async (
+  id: number,
+): Promise<Partial<IOfficeLocation>> => {
+  const [rows] = await pool.query<OfficeLocationQuery[]>(
+    'SELECT id, name, latitude, longitude, radius_meters, created_at FROM office_locations WHERE id = ?',
+    [id],
+  );
+
+  if (rows.length === 0) {
+    throw new ApiError(404, 'Office location not found');
+  }
+
+  return rows[0];
+};
+
 const insertOfficeLocation = async (
   input: InsertUpdateOfficeLocationBody,
 ): Promise<Partial<IOfficeLocation>> => {
@@ -100,6 +115,7 @@ const deleteOfficeLocation = async (
 
 export const officeLocationService = {
   getOfficeLocation,
+  getOfficeLocationById,
   insertOfficeLocation,
   updateOfficeLocation,
   deleteOfficeLocation,

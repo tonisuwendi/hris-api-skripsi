@@ -26,7 +26,7 @@ CREATE TABLE employees (
   birth_date DATE,
   gender ENUM('male','female'),
   marital_status ENUM('single','married','divorced','widowed'),
-  religion ENUM('islam','kristen','katolik','hindu','budha','konghucu'),
+  religion ENUM('islam','kristen','katolik','hindu','buddha','konghucu'),
   address TEXT,
   city VARCHAR(100),
   province VARCHAR(100),

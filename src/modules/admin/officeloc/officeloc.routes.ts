@@ -12,6 +12,9 @@ router.get(
   officeLocationController.getOfficeLocations,
 );
 
+// @ GET /admin/office-locations/:id
+router.get('/:id', officeLocationController.getOfficeLocationById);
+
 // @ POST /admin/office-locations
 router.post(
   '/',

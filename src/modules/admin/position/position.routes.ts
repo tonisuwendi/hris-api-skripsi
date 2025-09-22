@@ -12,6 +12,9 @@ router.get(
   positionController.getPositions,
 );
 
+// @ GET /admin/positions/:id
+router.get('/:id', positionController.getPositionById);
+
 // @ POST /admin/positions
 router.post(
   '/',

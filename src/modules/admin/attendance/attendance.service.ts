@@ -46,7 +46,11 @@ const getAttendances = async (
       a.start_time,
       a.end_time,
       a.work_mode,
-      a.office_name
+      a.office_name,
+      a.ci_latitude,
+      a.ci_longitude,
+      a.co_latitude,
+      a.co_longitude
      FROM attendance_sessions a
      JOIN employees e ON e.id = a.employee_id
      ${whereClause}

@@ -15,6 +15,9 @@ router.get(
   employeeController.getEmployees,
 );
 
+// @ GET /admin/employees/:id
+router.get('/:id', employeeController.getEmployeeById);
+
 // @ POST /admin/employees
 router.post(
   '/',

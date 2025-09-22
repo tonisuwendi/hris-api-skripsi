@@ -19,6 +19,24 @@ const getEmployees = async (
   }
 };
 
+const getEmployeeById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const employee = await employeeService.getEmployeeById(Number(id));
+    return res.status(200).json({
+      success: true,
+      message: 'Employee retrieved successfully',
+      data: employee,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const insertEmployee = async (
   req: Request,
   res: Response,
@@ -101,6 +119,7 @@ const deleteEmployee = async (
 
 export const employeeController = {
   getEmployees,
+  getEmployeeById,
   insertEmployee,
   updateEmployee,
   deleteEmployee,

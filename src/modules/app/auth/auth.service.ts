@@ -37,7 +37,7 @@ const login = async (
   const jwtPayload = { userId: user.id, role: 'employee' };
 
   const token = jwt.sign(jwtPayload, envConfig.jwtSecret, {
-    expiresIn: '1h',
+    expiresIn: '7d',
   });
 
   return {

@@ -42,6 +42,19 @@ const getPositions = async (
   };
 };
 
+const getPositionById = async (id: number): Promise<Partial<IPosition>> => {
+  const [rows] = await pool.query<PositionQuery[]>(
+    'SELECT id, name, description, created_at FROM positions WHERE id = ?',
+    [id],
+  );
+
+  if (rows.length === 0) {
+    throw new ApiError(404, 'Position not found');
+  }
+
+  return rows[0];
+};
+
 const insertPosition = async (
   input: InsertUpdatePositionBody,
 ): Promise<Partial<IPosition>> => {
@@ -136,6 +149,7 @@ const deletePosition = async (id: number): Promise<Partial<IPosition>> => {
 
 export const positionService = {
   getPositions,
+  getPositionById,
   insertPosition,
   updatePosition,
   deletePosition,

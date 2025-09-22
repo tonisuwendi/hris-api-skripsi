@@ -49,6 +49,19 @@ const getTaskSummary = async (
   };
 };
 
+const getTaskSummaryById = async (id: number): Promise<ITaskSummary> => {
+  const [rows] = await pool.query<TaskSummaryQuery[]>(
+    'SELECT * FROM task_summaries WHERE id = ?',
+    [id],
+  );
+
+  if (rows.length === 0) {
+    throw new Error('Task summary not found');
+  }
+
+  return rows[0];
+};
+
 const insertTaskSummary = async (
   data: InsertUpdateTaskSummaryBody,
 ): Promise<ITaskSummary> => {
@@ -59,6 +72,33 @@ const insertTaskSummary = async (
 
   if (existingEmployee.length === 0) {
     throw new Error('Employee not found');
+  }
+
+  const [existingRange] = await pool.query<TaskSummaryQuery[]>(
+    `
+    SELECT id FROM task_summaries
+    WHERE employee_id = ?
+      AND (
+        (period_start <= ? AND period_end >= ?)
+        OR (period_start <= ? AND period_end >= ?)
+        OR (period_start >= ? AND period_end <= ?)
+      )
+  `,
+    [
+      data.employee_id,
+      data.period_start,
+      data.period_start,
+      data.period_end,
+      data.period_end,
+      data.period_start,
+      data.period_end,
+    ],
+  );
+
+  if (existingRange.length > 0) {
+    throw new Error(
+      'A task summary for this employee already exists in the specified date range',
+    );
   }
 
   const [result] = await pool.query<ResultSetHeader>(
@@ -93,6 +133,34 @@ const updateTaskSummary = async (
 
   if (existingEmployee.length === 0) {
     throw new Error('Employee not found');
+  }
+
+  const [existingRange] = await pool.query<TaskSummaryQuery[]>(
+    `
+    SELECT id FROM task_summaries
+    WHERE employee_id = ? AND id != ?
+      AND (
+        (period_start <= ? AND period_end >= ?)
+        OR (period_start <= ? AND period_end >= ?)
+        OR (period_start >= ? AND period_end <= ?)
+      )
+  `,
+    [
+      data.employee_id,
+      id,
+      data.period_start,
+      data.period_start,
+      data.period_end,
+      data.period_end,
+      data.period_start,
+      data.period_end,
+    ],
+  );
+
+  if (existingRange.length > 0) {
+    throw new Error(
+      'A task summary for this employee already exists in the specified date range',
+    );
   }
 
   const [result] = await pool.query<ResultSetHeader>(
@@ -141,6 +209,7 @@ const deleteTaskSummary = async (id: number): Promise<ITaskSummary> => {
 
 export const taskSummaryService = {
   getTaskSummary,
+  getTaskSummaryById,
   insertTaskSummary,
   updateTaskSummary,
   deleteTaskSummary,

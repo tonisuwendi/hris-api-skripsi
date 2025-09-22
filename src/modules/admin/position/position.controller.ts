@@ -11,7 +11,25 @@ const getPositions = async (
     res.status(200).json({
       success: true,
       message: 'Positions retrieved successfully',
-      data: positions,
+      ...positions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getPositionById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const position = await positionService.getPositionById(Number(id));
+    return res.status(200).json({
+      success: true,
+      message: 'Position retrieved successfully',
+      data: position,
     });
   } catch (error) {
     next(error);
@@ -76,6 +94,7 @@ const deletePosition = async (
 
 export const positionController = {
   getPositions,
+  getPositionById,
   insertPosition,
   updatePosition,
   deletePosition,

@@ -49,6 +49,25 @@ const getEmployees = async (
   };
 };
 
+const getEmployeeById = async (id: number): Promise<Partial<IEmployee>> => {
+  const [rows] = await pool.query<EmployeeQuery[]>(
+    'SELECT * FROM employees WHERE id = ?',
+    [id],
+  );
+
+  if (rows.length === 0) {
+    throw new ApiError(404, 'Employee not found');
+  }
+
+  const withoutPassword = rows.map((row) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...rest } = row;
+    return rest;
+  });
+
+  return withoutPassword[0];
+};
+
 const insertEmployee = async (
   input: InsertEmployeeBody,
   file: Express.Multer.File | undefined,
@@ -132,7 +151,7 @@ const updateEmployee = async (
   file: Express.Multer.File | undefined,
 ): Promise<Partial<IEmployee>> => {
   const [existing] = await pool.query<EmployeeQuery[]>(
-    'SELECT id, employee_code, email FROM employees WHERE id = ?',
+    'SELECT id, employee_code, email, photo_url, password FROM employees WHERE id = ?',
     [id],
   );
 
@@ -242,22 +261,40 @@ const updateEmployee = async (
 };
 
 const deleteEmployee = async (id: number): Promise<Partial<IEmployee>> => {
-  const [existing] = await pool.query<EmployeeQuery[]>(
-    'SELECT id, employee_code, name, email FROM employees WHERE id = ?',
-    [id],
-  );
+  const connection = await pool.getConnection();
 
-  if (existing.length === 0) {
-    throw new ApiError(404, 'Employee not found');
+  try {
+    await connection.beginTransaction();
+
+    const [existing] = await connection.query<EmployeeQuery[]>(
+      'SELECT id, employee_code, name, email FROM employees WHERE id = ?',
+      [id],
+    );
+
+    if (existing.length === 0) {
+      throw new ApiError(404, 'Employee not found');
+    }
+
+    await connection.query('DELETE FROM task_summaries WHERE employee_id = ?', [
+      id,
+    ]);
+
+    await connection.query('DELETE FROM employees WHERE id = ?', [id]);
+
+    await connection.commit();
+
+    return existing[0];
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
   }
-
-  await pool.query('DELETE FROM employees WHERE id = ?', [id]);
-
-  return existing[0];
 };
 
 export const employeeService = {
   getEmployees,
+  getEmployeeById,
   insertEmployee,
   updateEmployee,
   deleteEmployee,

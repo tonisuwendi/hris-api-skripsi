@@ -12,6 +12,9 @@ router.get(
   taskSummaryController.getTaskSummary,
 );
 
+// @ GET /admin/task-summary/:id
+router.get('/:id', taskSummaryController.getTaskSummaryById);
+
 // @ POST /admin/task-summary
 router.post(
   '/',
