@@ -19,6 +19,24 @@ const getAttendances = async (
   }
 };
 
+const getAttendanceById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const result = await attendanceService.getAttendanceById(Number(id));
+    res.status(200).json({
+      success: true,
+      message: 'Attendance session retrieved successfully',
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateAttendance = async (
   req: Request,
   res: Response,
@@ -42,5 +60,6 @@ const updateAttendance = async (
 
 export const attendanceController = {
   getAttendances,
+  getAttendanceById,
   updateAttendance,
 };

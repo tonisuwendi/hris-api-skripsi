@@ -12,6 +12,9 @@ router.get(
   attendanceController.getAttendances,
 );
 
+// @ GET /admin/attendance/:id
+router.get('/:id', attendanceController.getAttendanceById);
+
 // @ PUT /admin/attendance/:id
 router.put(
   '/:id',

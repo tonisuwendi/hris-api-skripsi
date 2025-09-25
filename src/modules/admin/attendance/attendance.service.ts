@@ -65,6 +65,36 @@ const getAttendances = async (
   };
 };
 
+const getAttendanceById = async (
+  id: number,
+): Promise<AttendanceSessionQuery> => {
+  const [rows] = await pool.query<AttendanceSessionQuery[]>(
+    `SELECT 
+      a.id,
+      a.employee_id,
+      e.name AS employee_name,
+      a.work_date,
+      a.start_time,
+      a.end_time,
+      a.work_mode,
+      a.office_name,
+      a.ci_latitude,
+      a.ci_longitude,
+      a.co_latitude,
+      a.co_longitude
+     FROM attendance_sessions a
+     JOIN employees e ON e.id = a.employee_id
+     WHERE a.id = ?`,
+    [id],
+  );
+
+  if (rows.length === 0) {
+    throw new ApiError(404, 'Attendance session not found');
+  }
+
+  return rows[0];
+};
+
 const updateAttendance = async (
   id: number,
   body: UpdateAttendanceBody,
@@ -105,5 +135,6 @@ const updateAttendance = async (
 
 export const attendanceService = {
   getAttendances,
+  getAttendanceById,
   updateAttendance,
 };
