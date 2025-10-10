@@ -80,3 +80,21 @@ CREATE TABLE task_summaries (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (employee_id) REFERENCES employees(id)
 );
+
+CREATE TABLE performance_reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  employee_id INT NOT NULL,
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  productivity_score TINYINT NOT NULL CHECK (productivity_score BETWEEN 1 AND 10),
+  quality_score TINYINT NOT NULL CHECK (quality_score BETWEEN 1 AND 10),
+  discipline_score TINYINT NOT NULL CHECK (discipline_score BETWEEN 1 AND 10),
+  softskill_score TINYINT NOT NULL CHECK (softskill_score BETWEEN 1 AND 10),
+  overall_score DECIMAL(5,2) GENERATED ALWAYS AS (
+    (productivity_score + quality_score + discipline_score + softskill_score) / 4
+  ) STORED,
+  notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+);
