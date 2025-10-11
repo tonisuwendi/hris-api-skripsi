@@ -26,9 +26,14 @@ const getPerformance = async (
   const sql = `
     SELECT
       p.id,
+      p.employee_id,
       e.name AS employee_name,
       period_start,
       period_end,
+      CAST(productivity_score AS FLOAT) AS productivity_score,
+      CAST(quality_score AS FLOAT) AS quality_score,
+      CAST(discipline_score AS FLOAT) AS discipline_score,
+      CAST(softskill_score AS FLOAT) AS softskill_score,
       CAST(overall_score AS FLOAT) AS overall_score,
       notes,
       p.created_at
@@ -52,6 +57,7 @@ const getPerformanceById = async (id: number): Promise<IPerformance> => {
   const sql = `
     SELECT
       p.id,
+      p.employee_id,
       e.name AS employee_name,
       period_start,
       period_end,
