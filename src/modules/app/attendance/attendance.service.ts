@@ -5,6 +5,8 @@ import { haversineDistance } from '@/utils/haversine';
 import {
   ClockInOutInput,
   GetAttendanceHistoryInput,
+  GetAttendanceRequestInput,
+  RequestAttendanceInput,
 } from './attendance.schema';
 import {
   AttendanceSessionQuery,
@@ -15,6 +17,10 @@ import { IGetAllResult } from '@/types/general';
 import { sanitizePagination } from '@/utils/helpers';
 import { randomUUID } from 'crypto';
 import { uploadFile } from '@/utils/s3';
+import {
+  AttendanceRequestQuery,
+  IAttendanceRequest,
+} from '@/types/modules/attendance-request';
 
 const getAttendanceHistory = async (
   employeeId: number,
@@ -43,6 +49,29 @@ const getAttendanceHistory = async (
   const [rows] = await pool.query<AttendanceSessionQuery[]>(
     `SELECT * FROM attendance_sessions ${whereClauses} ORDER BY work_date DESC, start_time DESC LIMIT ? OFFSET ?`,
     [...queryParams, limit, offset],
+  );
+
+  return {
+    data: rows,
+    pagination: { total, limit, page: params.page ? Number(params.page) : 1 },
+  };
+};
+
+const getAttendanceRequest = async (
+  employeeId: number,
+  params: GetAttendanceRequestInput,
+): Promise<IGetAllResult<IAttendanceRequest>> => {
+  const { limit, offset } = sanitizePagination(params.limit, params.page);
+
+  const [totalRows] = await pool.query<AttendanceRequestQuery[]>(
+    'SELECT COUNT(*) as count FROM attendance_requests WHERE employee_id = ?',
+    [employeeId],
+  );
+  const total = totalRows[0].count;
+
+  const [rows] = await pool.query<AttendanceRequestQuery[]>(
+    `SELECT * FROM attendance_requests WHERE employee_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+    [employeeId, limit, offset],
   );
 
   return {
@@ -204,9 +233,38 @@ const clockOut = async (
   return updatedRows[0];
 };
 
+const requestAttendance = async (
+  employeeId: number,
+  input: RequestAttendanceInput,
+) => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO attendance_requests 
+      (employee_id, request_type, description, start_date, end_date, latitude, longitude, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())`,
+    [
+      employeeId,
+      input.request_type,
+      input.description,
+      input.start_date,
+      input.end_date,
+      input.latitude || null,
+      input.longitude || null,
+    ],
+  );
+
+  const [rows] = await pool.query<AttendanceRequestQuery[]>(
+    'SELECT * FROM attendance_requests WHERE id = ?',
+    [result.insertId],
+  );
+
+  return rows[0];
+};
+
 export const attendanceService = {
   getAttendanceHistory,
   getAttendanceStatus,
+  getAttendanceRequest,
   clockIn,
   clockOut,
+  requestAttendance,
 };

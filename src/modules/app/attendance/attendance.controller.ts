@@ -31,6 +31,33 @@ const getAttendanceHistory = async (
   }
 };
 
+const getAttendanceRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = (req as any).user?.id;
+    const params = {
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 10,
+    };
+
+    const requestData = await attendanceService.getAttendanceRequest(
+      Number(userId),
+      params,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Attendance request retrieved successfully',
+      data: requestData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getAttendanceStatus = async (
   req: Request,
   res: Response,
@@ -110,9 +137,33 @@ const clockOut = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const requestAttendance = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = (req as any).user?.id;
+    const requestData = await attendanceService.requestAttendance(
+      Number(userId),
+      req.body,
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Attendance request submitted successfully',
+      data: requestData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const attendanceController = {
   getAttendanceHistory,
   getAttendanceStatus,
+  getAttendanceRequest,
   clockIn,
   clockOut,
+  requestAttendance,
 };

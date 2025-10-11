@@ -15,6 +15,13 @@ router.get(
   attendanceController.getAttendanceHistory,
 );
 
+// @ GET /app/attendance/request
+router.get(
+  '/request',
+  validateRequest(attendanceSchema.getAttendanceRequest),
+  attendanceController.getAttendanceRequest,
+);
+
 // @ GET /app/attendance/status
 router.get('/status', attendanceController.getAttendanceStatus);
 
@@ -24,6 +31,13 @@ router.post(
   upload.single('photo'),
   validateRequest(attendanceSchema.clockInOutSchema),
   attendanceController.clockIn,
+);
+
+// @ POST /app/attendance/request
+router.post(
+  '/request',
+  validateRequest(attendanceSchema.requestAttendanceSchema),
+  attendanceController.requestAttendance,
 );
 
 // @ POST /app/attendance/end

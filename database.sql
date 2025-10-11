@@ -100,3 +100,18 @@ CREATE TABLE performance_reviews (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 );
+
+CREATE TABLE attendance_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  employee_id INT NOT NULL,
+  request_type ENUM('annual_leave', 'sick', 'other') NOT NULL,
+  description TEXT,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  latitude DECIMAL(10,8),
+  longitude DECIMAL(11,8),
+  status ENUM('pending', 'approved', 'rejected', 'cancelled') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+);
