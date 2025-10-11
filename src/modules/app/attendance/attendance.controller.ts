@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { attendanceService } from './attendance.service';
+import { ApiError } from '@/utils/ApiError';
 
 const getAttendanceHistory = async (
   req: Request,
@@ -30,12 +31,44 @@ const getAttendanceHistory = async (
   }
 };
 
+const getAttendanceStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = (req as any).user?.id;
+    const currStatus = await attendanceService.getAttendanceStatus(
+      Number(userId),
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Attendance status retrieved successfully',
+      data: currStatus,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const clockIn = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    if (req.file) {
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        throw new ApiError(400, 'Photo must be JPEG or PNG format');
+      }
+      if (req.file.size > 2 * 1024 * 1024) {
+        throw new ApiError(400, 'Photo size must not exceed 2MB');
+      }
+    }
+
     const userId = (req as any).user?.id;
     const clockInData = await attendanceService.clockIn(
       req.body,
       Number(userId),
+      req.file,
     );
 
     res.status(201).json({
@@ -50,10 +83,21 @@ const clockIn = async (req: Request, res: Response, next: NextFunction) => {
 
 const clockOut = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    if (req.file) {
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        throw new ApiError(400, 'Photo must be JPEG or PNG format');
+      }
+      if (req.file.size > 2 * 1024 * 1024) {
+        throw new ApiError(400, 'Photo size must not exceed 2MB');
+      }
+    }
+
     const userId = (req as any).user?.id;
     const clockOutData = await attendanceService.clockOut(
       req.body,
       Number(userId),
+      req.file,
     );
 
     res.status(200).json({
@@ -68,6 +112,7 @@ const clockOut = async (req: Request, res: Response, next: NextFunction) => {
 
 export const attendanceController = {
   getAttendanceHistory,
+  getAttendanceStatus,
   clockIn,
   clockOut,
 };

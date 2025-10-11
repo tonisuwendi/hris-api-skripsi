@@ -40,14 +40,14 @@ const getAttendanceHistory = z.object({
 });
 
 const clockInOutSchema = z.object({
-  latitude: z
+  latitude: z.coerce
     .number({
       required_error: 'Latitude is required',
       invalid_type_error: 'Latitude must be a number',
     })
     .min(-90, 'Latitude must be >= -90')
     .max(90, 'Latitude must be <= 90'),
-  longitude: z
+  longitude: z.coerce
     .number({
       required_error: 'Longitude is required',
       invalid_type_error: 'Longitude must be a number',
