@@ -260,6 +260,32 @@ const requestAttendance = async (
   return rows[0];
 };
 
+const cancelAttendanceRequest = async (
+  employeeId: number,
+  requestId: number,
+): Promise<IAttendanceRequest> => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE attendance_requests 
+     SET status = 'cancelled', updated_at = NOW() 
+     WHERE id = ? AND employee_id = ? AND status = 'pending'`,
+    [requestId, employeeId],
+  );
+
+  if (result.affectedRows === 0) {
+    throw new ApiError(
+      404,
+      'Attendance request not found or cannot be canceled',
+    );
+  }
+
+  const [rows] = await pool.query<AttendanceRequestQuery[]>(
+    'SELECT * FROM attendance_requests WHERE id = ?',
+    [requestId],
+  );
+
+  return rows[0];
+};
+
 export const attendanceService = {
   getAttendanceHistory,
   getAttendanceStatus,
@@ -267,4 +293,5 @@ export const attendanceService = {
   clockIn,
   clockOut,
   requestAttendance,
+  cancelAttendanceRequest,
 };

@@ -48,4 +48,7 @@ router.post(
   attendanceController.clockOut,
 );
 
+// @ PUT /app/attendance/cancel/:id
+router.put('/cancel/:id', attendanceController.cancelRequestAttendance);
+
 export default router;

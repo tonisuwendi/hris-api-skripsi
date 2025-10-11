@@ -159,6 +159,29 @@ const requestAttendance = async (
   }
 };
 
+const cancelRequestAttendance = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = (req as any).user?.id;
+    const { id } = req.params;
+    const canceledData = await attendanceService.cancelAttendanceRequest(
+      Number(userId),
+      Number(id),
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Attendance request canceled successfully',
+      data: canceledData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const attendanceController = {
   getAttendanceHistory,
   getAttendanceStatus,
@@ -166,4 +189,5 @@ export const attendanceController = {
   clockIn,
   clockOut,
   requestAttendance,
+  cancelRequestAttendance,
 };

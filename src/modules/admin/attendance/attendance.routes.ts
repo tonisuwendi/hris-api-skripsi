@@ -12,8 +12,22 @@ router.get(
   attendanceController.getAttendances,
 );
 
+// @ GET /admin/attendance/request
+router.get(
+  '/request',
+  validateRequest(attendanceSchema.getAttendanceRequest),
+  attendanceController.getAttendanceRequest,
+);
+
 // @ GET /admin/attendance/:id
 router.get('/:id', attendanceController.getAttendanceById);
+
+// @ PUT /admin/attendance/request/update-status
+router.put(
+  '/request/update-status',
+  validateRequest(attendanceSchema.updateStatusRequestSchema),
+  attendanceController.updateStatusRequest,
+);
 
 // @ PUT /admin/attendance/:id
 router.put(
