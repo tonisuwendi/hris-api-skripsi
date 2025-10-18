@@ -180,7 +180,7 @@ const getSalaryRecommendations = async (
       work_mode: emp.work_mode ?? 'Hybrid',
       years_of_service: emp.years_of_service ?? 0,
       job_position: emp.job_position ?? 'Technician',
-      performance_score: emp.performance_score ?? 0,
+      performance_score: emp.performance_score ? emp.performance_score * 10 : 0,
     }));
 
     const mlResponse = await axios.post(
@@ -317,7 +317,7 @@ const getSalaryRecommendationDetail = async (
     work_mode: emp.work_mode ?? 'Hybrid',
     years_of_service: emp.years_of_service ?? 0,
     job_position: emp.job_position ?? 'Technician',
-    performance_score: emp.performance_score ?? 0,
+    performance_score: emp.performance_score ? emp.performance_score * 10 : 0,
   };
 
   const insightRes = await axios.post(
