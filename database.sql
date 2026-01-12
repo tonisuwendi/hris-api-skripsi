@@ -115,3 +115,6 @@ CREATE TABLE attendance_requests (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 );
+
+INSERT INTO admins (name, email, password) VALUES 
+('Admin', 'admin@salariku.com', '$2a$12$z7a3qopUS/PN9YuIzxBlA.rXw.v6.qnDdKcpkgM1YobZqTpUbzatO'); -- default password: admin123
